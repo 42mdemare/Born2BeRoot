@@ -21,20 +21,20 @@ while true; do
 
   MESSAGE="
 ##################################################
-#            SYSTEM MONITORING REPORT            #
+#      🖥️  System Monitoring Report 📊         #
 ##################################################
-# Architecture    : $DISTRIBUTION $KERNEL $VERSION $ARCH
-# CPU Physical    : $CPU_PHYSICAL
-# vCPU            : $VCPU
-# Memory Usage    : $RAM_USAGE
-# Disk Usage      : $DISK_USAGE
-# CPU Load        : $CPU_LOAD
-# Last Boot       : $LAST_BOOT
-# LVM Use         : $LVM_STATUS
-# Connections TCP : $TCP_CONNECTIONS ESTABLISHED
-# User Log        : $USER_LOG
-# Network         : IP $IP_MAC
-# Sudo Commands   : $SUDO_CMDS cmds executed
+# 💾 Architecture    : $DISTRIBUTION $KERNEL $VERSION $ARCH GNU/Linux
+# 🧮 CPU Physical     : $CPU_PHYSICAL
+# 🧵 vCPU             : $VCPU
+# 📈 Memory Usage     : $RAM_USAGE
+# 📂 Disk Usage       : $DISK_USAGE
+# 🚀 CPU Load         : $CPU_LOAD
+# ⏰ Last Boot        : $LAST_BOOT
+# 📦 LVM Use          : $LVM_STATUS
+# 🔌 Connections TCP  : $TCP_CONNECTIONS ESTABLISHED
+# 👤 User Log         : $USER_LOG
+# 🌐 Network          : IP $IP_MAC
+# 🔐 Sudo Commands    : $SUDO_CMDS cmd
 ##################################################
 "
 
