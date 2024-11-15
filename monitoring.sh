@@ -20,18 +20,22 @@ while true; do
   SUDO_CMDS=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
 
   MESSAGE="
-#Architecture: $DISTRIBUTION $KERNEL $VERSION $ARCH GNU/Linux
-#CPU physical : $CPU_PHYSICAL
-#vCPU : $VCPU
-#Memory Usage: $RAM_USAGE
-#Disk Usage: $DISK_USAGE
-#CPU load: $CPU_LOAD
-#Last boot: $LAST_BOOT
-#LVM use: $LVM_STATUS
-#Connections TCP : $TCP_CONNECTIONS ESTABLISHED
-#User log: $USER_LOG
-#Network: IP $IP_MAC
-#Sudo : $SUDO_CMDS cmd
+##################################################
+#      🖥️  System Monitoring Report 📊         #
+##################################################
+# 💾 Architecture    : $DISTRIBUTION $KERNEL $VERSION $ARCH GNU/Linux
+# 🧮 CPU Physical     : $CPU_PHYSICAL
+# 🧵 vCPU             : $VCPU
+# 📈 Memory Usage     : $RAM_USAGE
+# 📂 Disk Usage       : $DISK_USAGE
+# 🚀 CPU Load         : $CPU_LOAD
+# ⏰ Last Boot        : $LAST_BOOT
+# 📦 LVM Use          : $LVM_STATUS
+# 🔌 Connections TCP  : $TCP_CONNECTIONS ESTABLISHED
+# 👤 User Log         : $USER_LOG
+# 🌐 Network          : IP $IP_MAC
+# 🔐 Sudo Commands    : $SUDO_CMDS cmd
+##################################################
 "
 
   echo "$MESSAGE" | wall
