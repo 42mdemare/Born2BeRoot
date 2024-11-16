@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Ensure PATH includes essential directories
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Gather system information
 ARCH=$(uname -m)
 DISTRIBUTION=$(awk '{print $1}' /etc/redhat-release)
 VERSION=$(awk '{print $4}' /etc/redhat-release)
@@ -21,7 +19,6 @@ IP=$(hostname -I | awk '{print $1}')
 MAC=$(ip link show | awk '/ether/ {print $2}')
 SUDO_CMDS=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
 
-# Prepare the message
 MESSAGE="
 ################################################################
 #                    SYSTEM MONITORING REPORT                  #
@@ -42,5 +39,5 @@ MESSAGE="
 ################################################################
 "
 
-# Broadcast the message to all connected terminals
 echo "$MESSAGE" | wall 2>/dev/null
+echo ""
