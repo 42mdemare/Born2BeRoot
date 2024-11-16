@@ -17,8 +17,8 @@ printf "${BLUE}| |_/ / ___  _ __ _ __  `' / /'| |_/ / ___| |_/ /___   ___| | ___
 printf "${CYAN}| ___ \/ _ \| '__| '_ \   / /  | ___ \/ _ \    // _ \ / __| |/ / | | |\n${DEF_COLOR}";
 printf "${CYAN}| |_/ / (_) | |  | | | |./ /___| |_/ /  __/ |\ \ (_) | (__|   <| |_| |\n${DEF_COLOR}";
 printf "${CYAN}\____/ \___/|_|  |_| |_|\_____/\____/ \___\_| \_\___/ \___|_|\_\\__, |\n${DEF_COLOR}";
-printf "${CYAN}                                  Tester                         __/ |\n${DEF_COLOR}";
-printf "${CYAN}                                  By Mdemare                    |___/ \n\n${DEF_COLOR}";
+printf "${CYAN}                                                                 __/ | Tester \n${DEF_COLOR}";
+printf "${CYAN}                                                                |___/  By Mdemare\n\n${DEF_COLOR}";
 
 USER=$(whoami)
 
