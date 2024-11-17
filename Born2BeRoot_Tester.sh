@@ -216,6 +216,7 @@ else
   FAILED=$((FAILED + 1))
 fi
 
+# Fonction pour tester un paramètre avec une valeur
 test_param() {
   local param="$1"
   local expected_value="$2"
@@ -243,15 +244,41 @@ test_param() {
   fi
 }
 
+# Fonction pour tester un paramètre sans valeur
+test_param_no_value() {
+  local param="$1"
+  local description="$2"
+  local found=0
+
+  # Vérifier dans /etc/pam.d/system-auth
+  RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/system-auth)
+  if [ -n "$RES" ]; then
+    found=1
+  fi
+
+  # Vérifier dans /etc/pam.d/password-auth
+  RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/password-auth)
+  if [ -n "$RES" ]; then
+    found=1
+  fi
+
+  # Résultat final
+  if [ $found -eq 1 ]; then
+    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
+  else
+    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
+    FAILED=$((FAILED + 1))
+  fi
+}
+
 # Tester les paramètres requis
 test_param "minlen" "10" "Minimum password length (minlen)"
 test_param "ucredit" "-1" "Uppercase character requirement (ucredit)"
 test_param "lcredit" "-1" "Lowercase character requirement (lcredit)"
 test_param "dcredit" "-1" "Digit character requirement (dcredit)"
 test_param "difok" "3" "Minimum different characters (difok)"
-test_param "reject_username" "" "Reject username as password"
-test_param "enforce_for_root" "" "Enforce password rules for root"
-
+test_param_no_value "reject_username" "Reject username as password"
+test_param_no_value "enforce_for_root" "Enforce password rules for root"
 
 # SSH Configuration
 echo
