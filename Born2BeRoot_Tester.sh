@@ -193,15 +193,6 @@ test_param_in_files "difok" "7" "Minimum different characters (difok) in PAM"
 test_param_in_files "reject_username" "" "Reject username as password in PAM"
 test_param_in_files "enforce_for_root" "" "Enforce password rules for root in PAM"
 
-# Afficher le résultat final
-if [ $FAILED -eq 0 ]; then
-  printf "${GREEN}[GOOD] 🎉 All tests passed! Congratulations! 🎉${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] 😢 Some tests failed. Please review the issues above.${DEF_COLOR}\n"
-fi
-
-
-
 # PASS_MAX_DAYS
 RES=$(grep "^PASS_MAX_DAYS" /etc/login.defs | awk '{print $2}')
 if [ "$RES" == "30" ]; then
@@ -248,8 +239,9 @@ echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 crontab -l | grep -q "monitoring.sh" && printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
-echo
-printf "${MAGENTA}BONUS${DEF_COLOR}\n";
+printf "${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
+printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
+printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
 
 # Vérification des partitions bonus
 echo
@@ -283,17 +275,11 @@ else
   printf "${RED}[FAILED] ✗${GRAY} No var-log partition found${DEF_COLOR}\n"
 fi
 
-printf "${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
-printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
-printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
-
 # Bonus: Web server and services
 echo
 printf "${MAGENTA}2. Bonus: Web server and services${DEF_COLOR}\n";
 systemctl is-active lighttpd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} Lighttpd active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Lighttpd inactive${DEF_COLOR}\n";
 systemctl is-active mariadb &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} MariaDB inactive${DEF_COLOR}\n";
-firewall-cmd --list-ports | grep -q "80" && printf "${GREEN}[GOOD] ✔${GRAY} HTTP port 80 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} HTTP port 80 closed${DEF_COLOR}\n";
-
 
 # Last message according to the results
 echo
