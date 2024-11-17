@@ -252,12 +252,14 @@ test_param_no_value() {
 
   # Vérifier dans /etc/pam.d/system-auth
   RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/system-auth)
+  echo "System-auth check for $param: '$RES'"  # Debugging
   if [ -n "$RES" ]; then
     found=1
   fi
 
   # Vérifier dans /etc/pam.d/password-auth
   RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/password-auth)
+  echo "Password-auth check for $param: '$RES'"  # Debugging
   if [ -n "$RES" ]; then
     found=1
   fi
@@ -277,8 +279,10 @@ test_param "ucredit" "-1" "Uppercase character requirement (ucredit)"
 test_param "lcredit" "-1" "Lowercase character requirement (lcredit)"
 test_param "dcredit" "-1" "Digit character requirement (dcredit)"
 test_param "difok" "3" "Minimum different characters (difok)"
+# Tester les paramètres requis sans valeur
 test_param_no_value "reject_username" "Reject username as password"
 test_param_no_value "enforce_for_root" "Enforce password rules for root"
+
 
 # SSH Configuration
 echo
