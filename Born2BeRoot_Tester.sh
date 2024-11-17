@@ -100,7 +100,7 @@ firewall-cmd --list-ports | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} 
 
 # PAM configuration for password policy
 echo
-printf "${MAGENTA}6. Password policy${DEF_COLOR}\n";
+printf "${MAGENTA}5. Password policy${DEF_COLOR}\n";
 
 # minlen
 RES=$(grep -Po "^\s*minlen\s*=\s*10" /etc/security/pwquality.conf)
@@ -181,41 +181,6 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-# PASS_MAX_DAYS
-RES=$(grep "^PASS_MAX_DAYS" /etc/login.defs | awk '{print $2}')
-if [ "$RES" == "30" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MAX_DAYS = 30${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} PASS_MAX_DAYS${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# PASS_MIN_DAYS
-RES=$(grep "^PASS_MIN_DAYS" /etc/login.defs | awk '{print $2}')
-if [ "$RES" == "2" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MIN_DAYS = 2${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} PASS_MIN_DAYS${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# PASS_WARN_AGE
-RES=$(grep "^PASS_WARN_AGE" /etc/login.defs | awk '{print $2}')
-if [ "$RES" == "7" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} PASS_WARN_AGE = 7${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} PASS_WARN_AGE${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# Vérification du dossier /var/log/sudo
-if [ -d "/var/log/sudo/" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
 # Fonction pour tester un paramètre avec une valeur
 test_param() {
   local param="$1"
@@ -252,14 +217,12 @@ test_param_no_value() {
 
   # Vérifier dans /etc/pam.d/system-auth
   RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/system-auth)
-  echo "System-auth check for $param: '$RES'"  # Debugging
   if [ -n "$RES" ]; then
     found=1
   fi
 
   # Vérifier dans /etc/pam.d/password-auth
   RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/password-auth)
-  echo "Password-auth check for $param: '$RES'"  # Debugging
   if [ -n "$RES" ]; then
     found=1
   fi
@@ -283,16 +246,50 @@ test_param "difok" "3" "Minimum different characters (difok)"
 test_param_no_value "reject_username" "Reject username as password"
 test_param_no_value "enforce_for_root" "Enforce password rules for root"
 
+# PASS_MAX_DAYS
+RES=$(grep "^PASS_MAX_DAYS" /etc/login.defs | awk '{print $2}')
+if [ "$RES" == "30" ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MAX_DAYS = 30${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} PASS_MAX_DAYS${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
+# PASS_MIN_DAYS
+RES=$(grep "^PASS_MIN_DAYS" /etc/login.defs | awk '{print $2}')
+if [ "$RES" == "2" ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MIN_DAYS = 2${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} PASS_MIN_DAYS${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
+# PASS_WARN_AGE
+RES=$(grep "^PASS_WARN_AGE" /etc/login.defs | awk '{print $2}')
+if [ "$RES" == "7" ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} PASS_WARN_AGE = 7${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} PASS_WARN_AGE${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
+# Vérification du dossier /var/log/sudo
+if [ -d "/var/log/sudo/" ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
 
 # SSH Configuration
 echo
-printf "${MAGENTA}7. SSH Configuration${DEF_COLOR}\n";
+printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
 systemctl is-active sshd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 semanage port -l | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 # Monitoring script cron job
 echo
-printf "${MAGENTA}8. Cronjob for monitoring script${DEF_COLOR}\n";
+printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 crontab -l | grep -q "monitoring.sh" && printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 echo
@@ -300,7 +297,7 @@ printf "${MAGENTA}BONUS${DEF_COLOR}\n";
 
 # Vérification des partitions bonus
 echo
-printf "${MAGENTA}3. Bonus Disk Partitions (Optional)${DEF_COLOR}\n";
+printf "${MAGENTA}1. Bonus Disk Partitions (Optional)${DEF_COLOR}\n";
 
 RES=$(lsblk | grep var | wc -l)
 if [ $RES -gt 0 ]; then
@@ -336,7 +333,7 @@ printf "${BLUE}╚════════════════════�
 
 # Bonus: Web server and services
 echo
-printf "${MAGENTA}5. Bonus: Web server and services${DEF_COLOR}\n";
+printf "${MAGENTA}2. Bonus: Web server and services${DEF_COLOR}\n";
 systemctl is-active lighttpd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} Lighttpd active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Lighttpd inactive${DEF_COLOR}\n";
 systemctl is-active mariadb &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} MariaDB inactive${DEF_COLOR}\n";
 firewall-cmd --list-ports | grep -q "80" && printf "${GREEN}[GOOD] ✔${GRAY} HTTP port 80 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} HTTP port 80 closed${DEF_COLOR}\n";
