@@ -255,22 +255,24 @@ fi
 if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
   
-# Find the exact path of the monitoring.sh script
-MONITORING_PATH=$(find / -type f -name "monitoring.sh" | head -n 1)
+# Find the exact path of the monitoring.sh script silently
+MONITORING_PATH=$(find / -type f -name "monitoring.sh" -executable 2>/dev/null | head -n 1)
 
-if [ -n "$MONITORING_PATH" ] && [ -x "$MONITORING_PATH" ]; then
-  printf "${CYAN}Running the monitoring.sh script found at: $MONITORING_PATH${DEF_COLOR}\n"
+if [ -n "$MONITORING_PATH" ]; then
+  bash "$MONITORING_PATH" >/dev/null 2>&1
   if [ $? -eq 0 ]; then
+    # Success: The script ran without errors
     printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh executed successfully using bash${DEF_COLOR}\n"
   else
+    # Failure: The script encountered an error during execution
     printf "${RED}[FAILED] ✗${GRAY} Failed to run monitoring.sh using bash${DEF_COLOR}\n"
     FAILEDMAND=$((FAILEDMAND + 1))
   fi
 else
+  # Failure: The script was not found or is not executable
   printf "${RED}[FAILED] ✗${GRAY} monitoring.sh is not executable or not found${DEF_COLOR}\n"
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
-
 
 # Checking custom message for sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
