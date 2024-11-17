@@ -102,7 +102,7 @@ firewall-cmd --list-ports | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} 
 echo
 printf "${MAGENTA}5. Password policy${DEF_COLOR}\n";
 
-# Fonction pour tester un paramètre dans un fichier spécifique avec ou sans valeur
+# Fonction générique pour tester un paramètre dans un fichier spécifique
 test_param_in_file() {
   local file="$1"
   local param="$2"
@@ -113,15 +113,11 @@ test_param_in_file() {
   if [ -n "$expected_value" ]; then
     # Tester avec une valeur spécifique
     RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" "$file" | tr -d '[:space:]')
-    if [ "$RES" == "$param=$expected_value" ]; then
-      found=1
-    fi
+    [ "$RES" == "$param=$expected_value" ] && found=1
   else
     # Tester sans valeur
-    RES=$(grep -Po "^\s*$param" "$file")
-    if [ "$RES" == "$param" ]; then
-      found=1
-    fi
+    RES=$(grep -Po "^\s*$param\b" "$file")
+    [ "$RES" == "$param" ] && found=1
   fi
 
   # Résultat final
@@ -140,17 +136,26 @@ test_param_in_files() {
   local description="$3"
   local found=0
 
-  # Vérifier dans /etc/pam.d/system-auth
-  RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\s*=\s*$expected_value\b" /etc/pam.d/system-auth)
-  if [ -n "$RES" ]; then
-    found=1
-  fi
+  # Liste des fichiers à vérifier
+  local files=(
+    "/etc/pam.d/system-auth"
+    "/etc/pam.d/password-auth"
+  )
 
-  # Vérifier dans /etc/pam.d/password-auth
-  RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\s*=\s*$expected_value\b" /etc/pam.d/password-auth)
-  if [ -n "$RES" ]; then
-    found=1
-  fi
+  for file in "${files[@]}"; do
+    if [ -n "$expected_value" ]; then
+      # Tester avec une valeur spécifique
+      RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\s*=\s*$expected_value\b" "$file")
+    else
+      # Tester sans valeur
+      RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" "$file")
+    fi
+
+    if [ -n "$RES" ]; then
+      found=1
+      break
+    fi
+  done
 
   # Résultat final
   if [ $found -eq 1 ]; then
@@ -161,7 +166,7 @@ test_param_in_files() {
   fi
 }
 
-# Tester les paramètres requis dans pwquality.conf
+# Tester les paramètres requis dans /etc/security/pwquality.conf
 test_param_in_file "/etc/security/pwquality.conf" "minlen" "10" "Minimum password length (minlen)"
 test_param_in_file "/etc/security/pwquality.conf" "ucredit" "-1" "Uppercase character requirement (ucredit)"
 test_param_in_file "/etc/security/pwquality.conf" "lcredit" "-1" "Lowercase character requirement (lcredit)"
@@ -170,7 +175,7 @@ test_param_in_file "/etc/security/pwquality.conf" "maxrepeat" "3" "Maximum repea
 test_param_in_file "/etc/security/pwquality.conf" "difok" "7" "Minimum different characters (difok)"
 test_param_in_file "/etc/security/pwquality.conf" "enforce_for_root" "" "Enforce password rules for root"
 
-# Vérification de reject_username ou usercheck
+# Vérification de reject_username ou usercheck dans pwquality.conf
 RES=$(grep -Po "^\s*(reject_username|usercheck\s*=\s*1)" /etc/security/pwquality.conf | tr -d '[:space:]')
 if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR}\n"
@@ -179,7 +184,7 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-# Tester les paramètres requis dans PAM
+# Tester les paramètres requis dans PAM (system-auth et password-auth)
 test_param_in_files "minlen" "10" "Minimum password length (minlen) in PAM"
 test_param_in_files "ucredit" "-1" "Uppercase character requirement (ucredit) in PAM"
 test_param_in_files "lcredit" "-1" "Lowercase character requirement (lcredit) in PAM"
@@ -187,6 +192,14 @@ test_param_in_files "dcredit" "-1" "Digit character requirement (dcredit) in PAM
 test_param_in_files "difok" "7" "Minimum different characters (difok) in PAM"
 test_param_in_files "reject_username" "" "Reject username as password in PAM"
 test_param_in_files "enforce_for_root" "" "Enforce password rules for root in PAM"
+
+# Afficher le résultat final
+if [ $FAILED -eq 0 ]; then
+  printf "${GREEN}[GOOD] 🎉 All tests passed! Congratulations! 🎉${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] 😢 Some tests failed. Please review the issues above.${DEF_COLOR}\n"
+fi
+
 
 
 # PASS_MAX_DAYS
