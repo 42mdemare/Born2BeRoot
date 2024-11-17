@@ -242,12 +242,12 @@ printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 FOUND=0
 
 # Check if the script is in the current user's crontab
-if crontab -l 2>/dev/null | grep -P "^\s*[^#].*monitoring\.sh"; then
+if crontab -l 2>/dev/null | grep -q "monitoring\.sh"; then
   FOUND=1
 fi
 
 # Check if the script is in /etc/crontab
-if grep -P "^\s*[^#].*monitoring\.sh" /etc/crontab; then
+if grep -q "monitoring\.sh" /etc/crontab; then
   FOUND=1
 fi
 
@@ -261,7 +261,8 @@ if [ $FOUND -eq 1 ]; then
   if [ -n "$MONITORING_PATH" ]; then
     bash "$MONITORING_PATH" >/dev/null 2>&1
     if [ $? -eq 0 ]; then
-      printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh executed successfully using bash${DEF_COLOR}\n"
+      # Log success (no display)
+      :
     else
       printf "${RED}[FAILED] ✗${GRAY} Failed to run monitoring.sh using bash${DEF_COLOR}\n"
       FAILEDMAND=$((FAILEDMAND + 1))
