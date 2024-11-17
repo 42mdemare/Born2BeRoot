@@ -102,87 +102,39 @@ firewall-cmd --list-ports | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} 
 echo
 printf "${MAGENTA}5. Password policy${DEF_COLOR}\n";
 
-# minlen
-RES=$(grep -Po "^\s*minlen\s*=\s*10" /etc/security/pwquality.conf)
-RES=$(echo "$RES" | tr -d '[:space:]')
-if [ "$RES" == "minlen=10" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} minlen${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} minlen${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
+# Fonction pour tester un paramètre dans un fichier spécifique avec ou sans valeur
+test_param_in_file() {
+  local file="$1"
+  local param="$2"
+  local expected_value="$3"
+  local description="$4"
+  local found=0
 
-# ucredit
-RES=$(grep -Po "^\s*ucredit\s*=\s*-1" /etc/security/pwquality.conf)
-RES=$(echo "$RES" | tr -d '[:space:]')
-if [ "$RES" == "ucredit=-1" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
+  if [ -n "$expected_value" ]; then
+    # Tester avec une valeur spécifique
+    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" "$file" | tr -d '[:space:]')
+    if [ "$RES" == "$param=$expected_value" ]; then
+      found=1
+    fi
+  else
+    # Tester sans valeur
+    RES=$(grep -Po "^\s*$param" "$file")
+    if [ "$RES" == "$param" ]; then
+      found=1
+    fi
+  fi
 
-# lcredit
-RES=$(grep -Po "^\s*lcredit\s*=\s*-1" /etc/security/pwquality.conf)
-RES=$(echo "$RES" | tr -d '[:space:]')
-if [ "$RES" == "lcredit=-1" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
+  # Résultat final
+  if [ $found -eq 1 ]; then
+    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
+  else
+    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
+    FAILED=$((FAILED + 1))
+  fi
+}
 
-# dcredit
-RES=$(grep -Po "^\s*dcredit\s*=\s*-1" /etc/security/pwquality.conf)
-RES=$(echo "$RES" | tr -d '[:space:]')
-if [ "$RES" == "dcredit=-1" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} digit (dcredit)${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} digit (dcredit)${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# maxrepeat
-RES=$(grep -Po "^\s*maxrepeat\s*=\s*3" /etc/security/pwquality.conf)
-RES=$(echo "$RES" | tr -d '[:space:]')
-if [ "$RES" == "maxrepeat=3" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# difok
-RES=$(grep -Po "^\s*difok\s*=\s*7" /etc/security/pwquality.conf)
-RES=$(echo "$RES" | tr -d '[:space:]')
-if [ "$RES" == "difok=7" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} different characters (difok)${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} different characters (difok)${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-
-# enforce_for_root
-RES=$(grep -Po "^\s*enforce_for_root" /etc/security/pwquality.conf)
-if [ "$RES" == "enforce_for_root" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} enforce_for_root${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} enforce_for_root${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# Vérification de reject_username ou usercheck
-RES=$(grep -Po "^\s*(reject_username|usercheck\s*=\s*1)" /etc/security/pwquality.conf | tr -d '[:space:]')
-if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR}\n"
-else
-  printf "${RED}[FAILED] ✗${GRAY} Username restriction inactive${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
-fi
-
-# Fonction pour tester un paramètre avec une valeur
-test_param() {
+# Fonction pour tester un paramètre dans plusieurs fichiers
+test_param_in_files() {
   local param="$1"
   local expected_value="$2"
   local description="$3"
@@ -209,42 +161,33 @@ test_param() {
   fi
 }
 
-# Fonction pour tester un paramètre sans valeur
-test_param_no_value() {
-  local param="$1"
-  local description="$2"
-  local found=0
+# Tester les paramètres requis dans pwquality.conf
+test_param_in_file "/etc/security/pwquality.conf" "minlen" "10" "Minimum password length (minlen)"
+test_param_in_file "/etc/security/pwquality.conf" "ucredit" "-1" "Uppercase character requirement (ucredit)"
+test_param_in_file "/etc/security/pwquality.conf" "lcredit" "-1" "Lowercase character requirement (lcredit)"
+test_param_in_file "/etc/security/pwquality.conf" "dcredit" "-1" "Digit character requirement (dcredit)"
+test_param_in_file "/etc/security/pwquality.conf" "maxrepeat" "3" "Maximum repeated characters (maxrepeat)"
+test_param_in_file "/etc/security/pwquality.conf" "difok" "7" "Minimum different characters (difok)"
+test_param_in_file "/etc/security/pwquality.conf" "enforce_for_root" "" "Enforce password rules for root"
 
-  # Vérifier dans /etc/pam.d/system-auth
-  RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/system-auth)
-  if [ -n "$RES" ]; then
-    found=1
-  fi
+# Vérification de reject_username ou usercheck
+RES=$(grep -Po "^\s*(reject_username|usercheck\s*=\s*1)" /etc/security/pwquality.conf | tr -d '[:space:]')
+if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} Username restriction inactive${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
 
-  # Vérifier dans /etc/pam.d/password-auth
-  RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" /etc/pam.d/password-auth)
-  if [ -n "$RES" ]; then
-    found=1
-  fi
+# Tester les paramètres requis dans PAM
+test_param_in_files "minlen" "10" "Minimum password length (minlen) in PAM"
+test_param_in_files "ucredit" "-1" "Uppercase character requirement (ucredit) in PAM"
+test_param_in_files "lcredit" "-1" "Lowercase character requirement (lcredit) in PAM"
+test_param_in_files "dcredit" "-1" "Digit character requirement (dcredit) in PAM"
+test_param_in_files "difok" "7" "Minimum different characters (difok) in PAM"
+test_param_in_files "reject_username" "" "Reject username as password in PAM"
+test_param_in_files "enforce_for_root" "" "Enforce password rules for root in PAM"
 
-  # Résultat final
-  if [ $found -eq 1 ]; then
-    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
-  else
-    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
-    FAILED=$((FAILED + 1))
-  fi
-}
-
-# Tester les paramètres requis
-test_param "minlen" "10" "Minimum password length (minlen)"
-test_param "ucredit" "-1" "Uppercase character requirement (ucredit)"
-test_param "lcredit" "-1" "Lowercase character requirement (lcredit)"
-test_param "dcredit" "-1" "Digit character requirement (dcredit)"
-test_param "difok" "3" "Minimum different characters (difok)"
-# Tester les paramètres requis sans valeur
-test_param_no_value "reject_username" "Reject username as password"
-test_param_no_value "enforce_for_root" "Enforce password rules for root"
 
 # PASS_MAX_DAYS
 RES=$(grep "^PASS_MAX_DAYS" /etc/login.defs | awk '{print $2}')
