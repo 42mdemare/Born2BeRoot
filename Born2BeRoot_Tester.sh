@@ -224,29 +224,17 @@ test_param() {
   local found=0
 
   # Vérifier dans /etc/pam.d/system-auth
-  if [ -n "$expected_value" ]; then
-    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/system-auth | tr -d '[:space:]')
-    if [ "$RES" == "$param=$expected_value" ]; then
-      found=1
-    fi
-  else
-    RES=$(grep -Po "^\s*$param" /etc/pam.d/system-auth | tr -d '[:space:]')
-    if [ "$RES" == "$param" ]; then
-      found=1
-    fi
+  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/system-auth | tr -d '[:space:]')
+  echo "System-auth RES for $param: '$RES'"  # Debugging
+  if [ "$RES" == "$param=$expected_value" ]; then
+    found=1
   fi
 
   # Vérifier dans /etc/pam.d/password-auth
-  if [ -n "$expected_value" ]; then
-    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/password-auth | tr -d '[:space:]')
-    if [ "$RES" == "$param=$expected_value" ]; then
-      found=1
-    fi
-  else
-    RES=$(grep -Po "^\s*$param" /etc/pam.d/password-auth | tr -d '[:space:]')
-    if [ "$RES" == "$param" ]; then
-      found=1
-    fi
+  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/password-auth | tr -d '[:space:]')
+  echo "Password-auth RES for $param: '$RES'"  # Debugging
+  if [ "$RES" == "$param=$expected_value" ]; then
+    found=1
   fi
 
   # Résultat final
