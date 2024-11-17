@@ -43,6 +43,16 @@ else
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
+# Check if GUI packages are installed
+GUI_PACKAGES=$(rpm -qa | grep -E 'gnome|kde|xfce|mate|lxde|wayland|xorg')
+if [[ -z "$GUI_PACKAGES" ]]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} No GUI packages installed${DEF_COLOR}\n";
+else
+  printf "${RED}[FAILED] ✗${GRAY} GUI packages detected:${DEF_COLOR}\n";
+  printf "${GRAY}$GUI_PACKAGES${DEF_COLOR}\n";
+  FAILEDMAND=$((FAILEDMAND + 1))
+fi
+
 # Hostname check
 echo
 printf "${MAGENTA}2. Hostname${DEF_COLOR}\n";
@@ -96,6 +106,7 @@ fi
 echo
 printf "${MAGENTA}4. Firewalld (Firewall)${DEF_COLOR}\n";
 systemctl is-active firewalld  && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR}\n"FAILEDMAND=$((FAILEDMAND + 1));
+systemctl is-enabled firewalld  && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld is active in start${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld is inactive in start${DEF_COLOR}\n"FAILEDMAND=$((FAILEDMAND + 1));
 firewall-cmd --list-ports | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR}\n"FAILEDMAND=$((FAILEDMAND + 1));
 
 # PAM configuration for password policy
@@ -220,6 +231,14 @@ else
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
+# Vérification si sudo est installé
+if command -v sudo > /dev/null 2>&1; then
+  printf "${GREEN}[GOOD] ✔${GRAY} sudo is installed${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} sudo is not installed${DEF_COLOR}\n"
+  FAILEDMAND=$((FAILEDMAND + 1))
+fi
+
 # Vérification du dossier /var/log/sudo
 if [ -d "/var/log/sudo/" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR}\n"
@@ -232,6 +251,7 @@ fi
 echo
 printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
 systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
+systemctl is-enabled sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH is active in start${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH is inactive in start${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
 # Check for the monitoring.sh script in the cron configuration
