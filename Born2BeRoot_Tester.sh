@@ -255,10 +255,13 @@ fi
 # Résultat final
 if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
-  # Exécuter monitoring.sh une fois
-  if [ -x "./monitoring.sh" ]; then
-    printf "${CYAN}Exécution du script monitoring.sh...${DEF_COLOR}\n"
-    ./monitoring.sh
+  
+  # Rechercher le chemin exact du script monitoring.sh
+  MONITORING_PATH=$(find / -type f -name "monitoring.sh" 2>/dev/null | head -n 1)
+  
+  if [ -n "$MONITORING_PATH" ] && [ -x "$MONITORING_PATH" ]; then
+    printf "${CYAN}Exécution du script monitoring.sh trouvé à : $MONITORING_PATH${DEF_COLOR}\n"
+    "$MONITORING_PATH"
     if [ $? -eq 0 ]; then
       printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh exécuté avec succès${DEF_COLOR}\n"
     else
@@ -273,7 +276,6 @@ else
   printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
-
 
 # Vérification du message personnalisé pour sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
