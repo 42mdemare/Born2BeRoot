@@ -224,21 +224,42 @@ test_param() {
   local found=0
 
   # Vérifier dans /etc/security/pwquality.conf
-  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/security/pwquality.conf | tr -d '[:space:]')
-  if [ "$RES" == "$param=$expected_value" ]; then
-    found=1
+  if [ -n "$expected_value" ]; then
+    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/security/pwquality.conf | tr -d '[:space:]')
+    if [ "$RES" == "$param=$expected_value" ]; then
+      found=1
+    fi
+  else
+    RES=$(grep -Po "^\s*$param" /etc/security/pwquality.conf | tr -d '[:space:]')
+    if [ "$RES" == "$param" ]; then
+      found=1
+    fi
   fi
 
   # Vérifier dans /etc/pam.d/system-auth
-  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/system-auth | tr -d '[:space:]')
-  if [ "$RES" == "$param=$expected_value" ]; then
-    found=1
+  if [ -n "$expected_value" ]; then
+    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/system-auth | tr -d '[:space:]')
+    if [ "$RES" == "$param=$expected_value" ]; then
+      found=1
+    fi
+  else
+    RES=$(grep -Po "^\s*$param" /etc/pam.d/system-auth | tr -d '[:space:]')
+    if [ "$RES" == "$param" ]; then
+      found=1
+    fi
   fi
 
   # Vérifier dans /etc/pam.d/password-auth
-  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/password-auth | tr -d '[:space:]')
-  if [ "$RES" == "$param=$expected_value" ]; then
-    found=1
+  if [ -n "$expected_value" ]; then
+    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/password-auth | tr -d '[:space:]')
+    if [ "$RES" == "$param=$expected_value" ]; then
+      found=1
+    fi
+  else
+    RES=$(grep -Po "^\s*$param" /etc/pam.d/password-auth | tr -d '[:space:]')
+    if [ "$RES" == "$param" ]; then
+      found=1
+    fi
   fi
 
   # Résultat final
@@ -260,6 +281,7 @@ test_param "difok" "7" "Minimum different characters (difok)"
 test_param "enforce_for_root" "" "Enforce password rules for root"
 test_param "reject_username" "" "Reject username as password"
 test_param "usercheck" "1" "User check (alternative to reject_username)"
+
 
 # SSH Configuration
 echo
