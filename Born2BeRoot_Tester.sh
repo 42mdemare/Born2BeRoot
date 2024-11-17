@@ -103,7 +103,7 @@ echo
 printf "${MAGENTA}6. Password policy${DEF_COLOR}\n";
 
 # minlen
-RES=$(grep -Po "minlen\s*=\s*10" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*minlen\s*=\s*10" /etc/security/pwquality.conf)
 RES=$(echo "$RES" | tr -d '[:space:]')
 if [ "$RES" == "minlen=10" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} minlen${DEF_COLOR}\n"
@@ -113,7 +113,7 @@ else
 fi
 
 # ucredit
-RES=$(grep -Po "ucredit\s*=\s*-1" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*ucredit\s*=\s*-1" /etc/security/pwquality.conf)
 RES=$(echo "$RES" | tr -d '[:space:]')
 if [ "$RES" == "ucredit=-1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
@@ -123,7 +123,7 @@ else
 fi
 
 # lcredit
-RES=$(grep -Po "lcredit\s*=\s*-1" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*lcredit\s*=\s*-1" /etc/security/pwquality.conf)
 RES=$(echo "$RES" | tr -d '[:space:]')
 if [ "$RES" == "lcredit=-1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
@@ -133,7 +133,7 @@ else
 fi
 
 # dcredit
-RES=$(grep -Po "dcredit\s*=\s*-1" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*dcredit\s*=\s*-1" /etc/security/pwquality.conf)
 RES=$(echo "$RES" | tr -d '[:space:]')
 if [ "$RES" == "dcredit=-1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} digit (dcredit)${DEF_COLOR}\n"
@@ -143,7 +143,7 @@ else
 fi
 
 # maxrepeat
-RES=$(grep -Po "maxrepeat\s*=\s*3" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*maxrepeat\s*=\s*3" /etc/security/pwquality.conf)
 RES=$(echo "$RES" | tr -d '[:space:]')
 if [ "$RES" == "maxrepeat=3" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
@@ -153,7 +153,7 @@ else
 fi
 
 # difok
-RES=$(grep -Po "difok\s*=\s*7" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*difok\s*=\s*7" /etc/security/pwquality.conf)
 RES=$(echo "$RES" | tr -d '[:space:]')
 if [ "$RES" == "difok=7" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} different characters (difok)${DEF_COLOR}\n"
@@ -164,7 +164,7 @@ fi
 
 
 # enforce_for_root
-RES=$(grep -o "enforce_for_root" /etc/security/pwquality.conf)
+RES=$(grep -Po "^\s*enforce_for_root" /etc/security/pwquality.conf)
 if [ "$RES" == "enforce_for_root" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} enforce_for_root${DEF_COLOR}\n"
 else
@@ -172,12 +172,12 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-# reject_username
-RES=$(grep -o "reject_username" /etc/security/pwquality.conf)
-if [ "$RES" == "reject_username" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} reject_username${DEF_COLOR}\n"
+# Vérification de reject_username ou usercheck
+RES=$(grep -Po "^\s*(reject_username|usercheck\s*=\s*1)" /etc/security/pwquality.conf | tr -d '[:space:]')
+if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR}\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} reject_username${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} Username restriction inactive${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
 
@@ -216,6 +216,51 @@ else
   FAILED=$((FAILED + 1))
 fi
 
+# Fonction pour tester un paramètre dans plusieurs fichiers
+test_param() {
+  local param="$1"
+  local expected_value="$2"
+  local description="$3"
+  local found=0
+
+  # Vérifier dans /etc/security/pwquality.conf
+  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/security/pwquality.conf | tr -d '[:space:]')
+  if [ "$RES" == "$param=$expected_value" ]; then
+    found=1
+  fi
+
+  # Vérifier dans /etc/pam.d/system-auth
+  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/system-auth | tr -d '[:space:]')
+  if [ "$RES" == "$param=$expected_value" ]; then
+    found=1
+  fi
+
+  # Vérifier dans /etc/pam.d/password-auth
+  RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/pam.d/password-auth | tr -d '[:space:]')
+  if [ "$RES" == "$param=$expected_value" ]; then
+    found=1
+  fi
+
+  # Résultat final
+  if [ $found -eq 1 ]; then
+    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
+  else
+    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
+    FAILED=$((FAILED + 1))
+  fi
+}
+
+# Tester les paramètres requis
+test_param "minlen" "10" "Minimum password length (minlen)"
+test_param "ucredit" "-1" "Uppercase character requirement (ucredit)"
+test_param "lcredit" "-1" "Lowercase character requirement (lcredit)"
+test_param "dcredit" "-1" "Digit character requirement (dcredit)"
+test_param "maxrepeat" "3" "Maximum repeated characters (maxrepeat)"
+test_param "difok" "7" "Minimum different characters (difok)"
+test_param "enforce_for_root" "" "Enforce password rules for root"
+test_param "reject_username" "" "Reject username as password"
+test_param "usercheck" "1" "User check (alternative to reject_username)"
+
 # SSH Configuration
 echo
 printf "${MAGENTA}7. SSH Configuration${DEF_COLOR}\n";
@@ -228,7 +273,7 @@ printf "${MAGENTA}8. Cronjob for monitoring script${DEF_COLOR}\n";
 crontab -l | grep -q "monitoring.sh" && printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 echo
-printf "${MAGENTA}3. BONNUS${DEF_COLOR}\n";
+printf "${MAGENTA}BONUS${DEF_COLOR}\n";
 
 # Vérification des partitions bonus
 echo
