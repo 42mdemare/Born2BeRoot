@@ -303,8 +303,11 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-# Vérifier si l'utilisateur actuel appartient aux groupes sudo et user42
-USER_GROUPS=$(groups $(whoami))
+# Obtenir l'utilisateur initial ayant exécuté le script
+ORIGINAL_USER=${SUDO_USER:-$(whoami)}
+
+# Récupérer les groupes de l'utilisateur initial
+USER_GROUPS=$(groups "$ORIGINAL_USER")
 
 if echo "$USER_GROUPS" | grep -qw "sudo"; then
   printf "${GREEN}[GOOD] ✔${GRAY} L'utilisateur $(whoami) appartient au groupe sudo${DEF_COLOR}\n"
@@ -371,11 +374,11 @@ systemctl is-active mariadb && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active$
 systemctl is-active php-fpm && printf "${GREEN}[GOOD] ✔${GRAY} PHP active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} PHP inactive${DEF_COLOR} FAILEDBONUS=$((FAILEDBONUS + 1))\n";
 # Last message according to the results
 echo
-if [ $FAILEDMAND -eq 0 && FAILEDBONUS]; then
+if [ $FAILEDMAND -eq 0 ] && [ $FAILEDBONUS -eq 0 ]; then
 printf "${GREEN}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${GREEN}║    🎉🥳  Mandatory and Bonus Tests Completed, your have Rockyed it! 🥳🎉     ║\n${DEF_COLOR}"
 printf "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
-else if [ $FAILEDMAND -eq 0 ]; then
+elif [ $FAILEDMAND -eq 0 ]; then
 printf "${GREEN}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${GREEN}║         🎉🥳  Mandatory Tests Completed, your have Rockyed it! 🥳🎉          ║\n${DEF_COLOR}"
 printf "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
