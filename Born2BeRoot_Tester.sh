@@ -255,26 +255,22 @@ fi
 if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
   
-  # Find the exact path of the monitoring.sh script
-  MONITORING_PATH=$(find / -type f -name "monitoring.sh" | head -n 1)
-  
-  if [ -n "$MONITORING_PATH" ] && [ -x "$MONITORING_PATH" ]; then
-    printf "${CYAN}Running the monitoring.sh script found at : $MONITORING_PATH${DEF_COLOR}\n"
-    "$MONITORING_PATH"
-    if [ $? -eq 0 ]; then
-      printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh executed successfully${DEF_COLOR}\n"
-    else
-      printf "${RED}[FAILED] ✗${GRAY} Failed to run monitoring.sh${DEF_COLOR}\n"
-      FAILEDMAND=$((FAILEDMAND + 1))
-    fi
+# Find the exact path of the monitoring.sh script
+MONITORING_PATH=$(find / -type f -name "monitoring.sh" | head -n 1)
+
+if [ -n "$MONITORING_PATH" ] && [ -x "$MONITORING_PATH" ]; then
+  printf "${CYAN}Running the monitoring.sh script found at: $MONITORING_PATH${DEF_COLOR}\n"
+  if [ $? -eq 0 ]; then
+    printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh executed successfully using bash${DEF_COLOR}\n"
   else
-    printf "${RED}[FAILED] ✗${GRAY} monitoring.sh is not executable or not found${DEF_COLOR}\n"
+    printf "${RED}[FAILED] ✗${GRAY} Failed to run monitoring.sh using bash${DEF_COLOR}\n"
     FAILEDMAND=$((FAILEDMAND + 1))
   fi
 else
-  printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} monitoring.sh is not executable or not found${DEF_COLOR}\n"
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
+
 
 # Checking custom message for sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
@@ -282,6 +278,9 @@ grep '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD]
 
 # Checking TTY mode
 grep '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
+
+# Verifying secure paths
+grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
 # Checking user42 and sudo groups
 echo
@@ -322,9 +321,6 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-
-# Verifying secure paths
-grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 printf "\n${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
 printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
