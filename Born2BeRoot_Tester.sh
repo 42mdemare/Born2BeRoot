@@ -13,7 +13,6 @@ WHITE='\033[0;97m'
 
 FAILEDMAND=0
 FAILEDBONUS=0
-#Vérification de la présence de monitoring.sh
 FOUND=0
 
 printf "${BLUE}______                   _____ ______     ______           _          \n${DEF_COLOR}";
@@ -62,7 +61,7 @@ fi
 echo
 printf "${MAGENTA}3. Disk partitions${DEF_COLOR}\n";
 
-# Vérification des partitions obligatoires
+# Checking Mandatory Partitions
 RES=$(lsblk | grep lvm | wc -l)
 if [ $RES -gt 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} LVM partitions detected${DEF_COLOR} $RES\n"
@@ -105,7 +104,7 @@ firewall-cmd --list-ports | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Por
 echo
 printf "${MAGENTA}5. Password policy${DEF_COLOR}\n";
 
-# Fonction générique pour tester un paramètre dans un fichier spécifique
+# Generic function to test a parameter in a specific file
 test_param_in_file() {
   local file="$1"
   local param="$2"
@@ -114,16 +113,16 @@ test_param_in_file() {
   local found=0
 
   if [ -n "$expected_value" ]; then
-    # Tester avec une valeur spécifique
+    # Test with a specific value
     RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" "$file" | tr -d '[:space:]')
     [ "$RES" == "$param=$expected_value" ] && found=1
   else
-    # Tester sans valeur
+    # Test worthless
     RES=$(grep -Po "^\s*$param\b" "$file")
     [ "$RES" == "$param" ] && found=1
   fi
 
-  # Résultat final
+  # Final result
   if [ $found -eq 1 ]; then
     printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR} $RES\n"
   else
@@ -132,14 +131,14 @@ test_param_in_file() {
   fi
 }
 
-# Fonction pour tester un paramètre dans plusieurs fichiers
+# Function to test a parameter in multiple files
 test_param_in_files() {
   local param="$1"
   local expected_value="$2"
   local description="$3"
   local found=0
 
-  # Liste des fichiers à vérifier
+  # List of files to check
   local files=(
     "/etc/pam.d/system-auth"
     "/etc/pam.d/password-auth"
@@ -147,10 +146,10 @@ test_param_in_files() {
 
   for file in "${files[@]}"; do
     if [ -n "$expected_value" ]; then
-      # Tester avec une valeur spécifique
+      # Test with a specific value
       RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\s*=\s*$expected_value\b" "$file")
     else
-      # Tester sans valeur
+      # Test worthless
       RES=$(grep -Po "^\s*password\s+requisite\s+pam_pwquality\.so.*\b$param\b" "$file")
     fi
 
@@ -160,7 +159,7 @@ test_param_in_files() {
     fi
   done
 
-  # Résultat final
+  # Final result
   if [ $found -eq 1 ]; then
     printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
   else
@@ -169,7 +168,7 @@ test_param_in_files() {
   fi
 }
 
-# Tester les paramètres requis dans /etc/security/pwquality.conf
+# Test the required settings in /etc/security/pwquality.conf
 test_param_in_file "/etc/security/pwquality.conf" "minlen" "10" "Minimum password length (minlen)"
 test_param_in_file "/etc/security/pwquality.conf" "ucredit" "-1" "Uppercase character requirement (ucredit)"
 test_param_in_file "/etc/security/pwquality.conf" "lcredit" "-1" "Lowercase character requirement (lcredit)"
@@ -178,7 +177,7 @@ test_param_in_file "/etc/security/pwquality.conf" "maxrepeat" "3" "Maximum repea
 test_param_in_file "/etc/security/pwquality.conf" "difok" "7" "Minimum different characters (difok)"
 test_param_in_file "/etc/security/pwquality.conf" "enforce_for_root" "" "Enforce password rules for root"
 
-# Vérification de reject_username ou usercheck dans pwquality.conf
+# Checking reject_username or usercheck in pwquality.conf
 RES=$(grep -Po "^\s*(reject_username|usercheck\s*=\s*1)" /etc/security/pwquality.conf | tr -d '[:space:]')
 if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR} $RES\n"
@@ -187,7 +186,7 @@ else
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
-# Tester les paramètres requis dans PAM (system-auth et password-auth)
+# Test required settings in PAM (system-auth and password-auth)
 test_param_in_files "minlen" "10" "Minimum password length (minlen) in PAM"
 test_param_in_files "ucredit" "-1" "Uppercase character requirement (ucredit) in PAM"
 test_param_in_files "lcredit" "-1" "Lowercase character requirement (lcredit) in PAM"
@@ -241,35 +240,35 @@ semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 al
 echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 
-# Vérifier dans le crontab de l'utilisateur actuel
+# Check in current user's crontab
 FOUND=0
 if crontab -l 2>/dev/null | grep -P "^\s*[^#].*monitoring\.sh"; then
   FOUND=1
 fi
 
-# Vérifier dans /etc/crontab
+# Check in /etc/crontab
 if grep -P "^\s*[^#].*monitoring\.sh" /etc/crontab; then
   FOUND=1
 fi
 
-# Résultat final
+# Final result
 if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
   
-  # Rechercher le chemin exact du script monitoring.sh
+  # Find the exact path of the monitoring.sh script
   MONITORING_PATH=$(find / -type f -name "monitoring.sh" | head -n 1)
   
   if [ -n "$MONITORING_PATH" ] && [ -x "$MONITORING_PATH" ]; then
-    printf "${CYAN}Exécution du script monitoring.sh trouvé à : $MONITORING_PATH${DEF_COLOR}\n"
+    printf "${CYAN}Running the monitoring.sh script found at : $MONITORING_PATH${DEF_COLOR}\n"
     "$MONITORING_PATH"
     if [ $? -eq 0 ]; then
-      printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh exécuté avec succès${DEF_COLOR}\n"
+      printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh executed successfully${DEF_COLOR}\n"
     else
-      printf "${RED}[FAILED] ✗${GRAY} Échec lors de l'exécution de monitoring.sh${DEF_COLOR}\n"
+      printf "${RED}[FAILED] ✗${GRAY} Failed to run monitoring.sh${DEF_COLOR}\n"
       FAILEDMAND=$((FAILEDMAND + 1))
     fi
   else
-    printf "${RED}[FAILED] ✗${GRAY} monitoring.sh n'est pas exécutable ou introuvable${DEF_COLOR}\n"
+    printf "${RED}[FAILED] ✗${GRAY} monitoring.sh is not executable or not found${DEF_COLOR}\n"
     FAILEDMAND=$((FAILEDMAND + 1))
   fi
 else
@@ -277,60 +276,60 @@ else
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
-# Vérification du message personnalisé pour sudo
+# Checking custom message for sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
 grep '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Custom badpass_message configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Custom badpass_message not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
-# Vérification du mode TTY
+# Checking TTY mode
 grep '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
-# Vérification des groupes user42 et sudo
+# Checking user42 and sudo groups
 echo
-printf "${MAGENTA}9. Vérification des groupes user42 et sudo${DEF_COLOR}\n"
+printf "${MAGENTA}9. Checking user42 and sudo groups${DEF_COLOR}\n"
 
-# Vérifier si les groupes user42 et sudo existent
-if grep -q "^sudo:" /etc/group; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Le groupe sudo existe${DEF_COLOR}\n"
+# Check if user42 and sudo groups exist
+if grep "^sudo:" /etc/group; then
+  printf "${GREEN}[GOOD] ✔${GRAY} The sudo group exists${DEF_COLOR}\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} Le groupe sudo n'existe pas${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} sudo group does not exist${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
 
-if grep -q "^user42:" /etc/group; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Le groupe user42 existe${DEF_COLOR}\n"
+if grep "^user42:" /etc/group; then
+  printf "${GREEN}[GOOD] ✔${GRAY} User42 group exists${DEF_COLOR}\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} Le groupe user42 n'existe pas${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} User42 group does not exist${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
 
-# Obtenir l'utilisateur initial ayant exécuté le script
+# Get the initial user who ran the script
 ORIGINAL_USER=${SUDO_USER:-$(whoami)}
 
-# Récupérer les groupes de l'utilisateur initial
+# Retrieve the original user's groups
 USER_GROUPS=$(groups "$ORIGINAL_USER")
 
-if echo "$USER_GROUPS" | grep -qw "sudo"; then
-  printf "${GREEN}[GOOD] ✔${GRAY} L'utilisateur $(whoami) appartient au groupe sudo${DEF_COLOR}\n"
+if echo "$USER_GROUPS" | grep -w "sudo"; then
+  printf "${GREEN}[GOOD] ✔${GRAY} The user $ORIGINAL_USER belongs to the sudo group${DEF_COLOR}\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} L'utilisateur $(whoami) n'appartient pas au groupe sudo${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} User $ORIGINAL_USER does not belong to sudo group${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
 
-if echo "$USER_GROUPS" | grep -qw "user42"; then
-  printf "${GREEN}[GOOD] ✔${GRAY} L'utilisateur $(whoami) appartient au groupe user42${DEF_COLOR}\n"
+if echo "$USER_GROUPS" | grep -w "user42"; then
+  printf "${GREEN}[GOOD] ✔${GRAY} The user $ORIGINAL_USER belongs to the user42 group${DEF_COLOR}\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} L'utilisateur $(whoami) n'appartient pas au groupe user42${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} The user $ORIGINAL_USER does not belong to the user42 group${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
 
 
-# Vérification des chemins sécurisés
+# Verifying secure paths
 grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 printf "\n${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
 printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
 
-# Vérification des partitions bonus
+# Checking bonus scores
 echo
 printf "${MAGENTA}1. Bonus Disk Partitions (Optional)${DEF_COLOR}\n";
 
