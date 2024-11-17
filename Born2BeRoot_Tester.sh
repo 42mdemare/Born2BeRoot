@@ -257,7 +257,7 @@ if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
   
   # Rechercher le chemin exact du script monitoring.sh
-  MONITORING_PATH=$(find / -type f -name "monitoring.sh" 2>/dev/null | head -n 1)
+  MONITORING_PATH=$(find / -type f -name "monitoring.sh" | head -n 1)
   
   if [ -n "$MONITORING_PATH" ] && [ -x "$MONITORING_PATH" ]; then
     printf "${CYAN}Exécution du script monitoring.sh trouvé à : $MONITORING_PATH${DEF_COLOR}\n"
