@@ -12,6 +12,8 @@ GRAY='\033[0;90m'
 WHITE='\033[0;97m'
 
 FAILED=0
+#Vérification de la présence de monitoring.sh
+FOUND=0
 
 printf "${BLUE}______                   _____ ______     ______           _          \n${DEF_COLOR}";
 printf "${BLUE}| ___ \                 / __  \| ___ \    | ___ \         | |         \n${DEF_COLOR}";
@@ -237,7 +239,29 @@ semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 al
 # Monitoring script cron job
 echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
-crontab -l | grep "monitoring.sh" && printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+
+# Vérifier dans le crontab de l'utilisateur actuel
+if crontab -l 2>/dev/null | grep -P "^\s*[^#].*monitoring\.sh" &>/dev/null; then
+  FOUND=1
+fi
+
+# Vérifier dans le crontab root
+if sudo crontab -l 2>/dev/null | grep -P "^\s*[^#].*monitoring\.sh" &>/dev/null; then
+  FOUND=1
+fi
+
+# Vérifier dans /etc/crontab
+if grep -P "^\s*[^#].*monitoring\.sh" /etc/crontab &>/dev/null; then
+  FOUND=1
+fi
+
+# Résultat final
+if [ $FOUND -eq 1 ]; then
+  printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
 
 printf "${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
