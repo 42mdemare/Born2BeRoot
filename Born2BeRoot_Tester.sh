@@ -37,9 +37,9 @@ printf "${BLUE}╚════════════════════�
 printf "${MAGENTA}1. GUI MODE DISABLE?${DEF_COLOR}\n";
 RES=$(systemctl get-default)
 if [[ $RES == "multi-user.target" ]]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} GUI mode disabled${DEF_COLOR} $RES\n";
+  printf "${GREEN}[GOOD] ✔${GRAY} GUI mode disabled${DEF_COLOR}\n";
 else
-  printf "${RED}[FAILED] ✗${GRAY} GUI mode enabled${DEF_COLOR} $RES\n";
+  printf "${RED}[FAILED] ✗${GRAY} GUI mode enabled${DEF_COLOR}\n";
   FAILED=$((FAILED + 1))
 fi
 
@@ -57,7 +57,7 @@ fi
 
 # LVM and encrypted partitions
 echo
-printf "${MAGENTA}3. Disk partitions${DEF_COLOR} $RES\n";
+printf "${MAGENTA}3. Disk partitions${DEF_COLOR}\n";
 
 # Vérification des partitions obligatoires
 RES=$(lsblk | grep lvm | wc -l)
@@ -95,8 +95,8 @@ fi
 # Firewalld configuration
 echo
 printf "${MAGENTA}4. Firewalld (Firewall)${DEF_COLOR}\n";
-systemctl is-active firewalld &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR}\n"FAILED=$((FAILED + 1));
-firewall-cmd --list-ports | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR}\n"FAILED=$((FAILED + 1));
+systemctl is-active firewalld &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR} $RES\n"FAILED=$((FAILED + 1));
+firewall-cmd --list-ports | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR} $RES\n"FAILED=$((FAILED + 1));
 
 # PAM configuration for password policy
 echo
@@ -122,9 +122,9 @@ test_param_in_file() {
 
   # Résultat final
   if [ $found -eq 1 ]; then
-    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
+    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR} $RES\n"
   else
-    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
+    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR} $RES\n"
     FAILED=$((FAILED + 1))
   fi
 }
@@ -159,9 +159,9 @@ test_param_in_files() {
 
   # Résultat final
   if [ $found -eq 1 ]; then
-    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
+    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR} $RES\n"
   else
-    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
+    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR} $RES\n"
     FAILED=$((FAILED + 1))
   fi
 }
@@ -178,9 +178,9 @@ test_param_in_file "/etc/security/pwquality.conf" "enforce_for_root" "" "Enforce
 # Vérification de reject_username ou usercheck dans pwquality.conf
 RES=$(grep -Po "^\s*(reject_username|usercheck\s*=\s*1)" /etc/security/pwquality.conf | tr -d '[:space:]')
 if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} Username restriction inactive${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} Username restriction inactive${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
@@ -222,17 +222,17 @@ fi
 
 # Vérification du dossier /var/log/sudo
 if [ -d "/var/log/sudo/" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR} $RES\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR}\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR} $RES\n"
+  printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
 
 # SSH Configuration
 echo
 printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
-systemctl is-active sshd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILED=$((FAILED + 1));
-semanage port -l | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+systemctl is-active sshd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
+semanage port -l | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
 
 # Monitoring script cron job
 echo
