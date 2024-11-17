@@ -233,8 +233,8 @@ fi
 # SSH Configuration
 echo
 printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
-systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
-semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
+systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 # Monitoring script cron job
 echo
