@@ -95,8 +95,8 @@ fi
 # Firewalld configuration
 echo
 printf "${MAGENTA}4. Firewalld (Firewall)${DEF_COLOR}\n";
-systemctl is-active firewalld &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR} $RES\n"FAILED=$((FAILED + 1));
-firewall-cmd --list-ports | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR} $RES\n"FAILED=$((FAILED + 1));
+systemctl is-active firewalld  && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR}\n"FAILED=$((FAILED + 1));
+firewall-cmd --list-ports | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR}\n"FAILED=$((FAILED + 1));
 
 # PAM configuration for password policy
 echo
@@ -159,9 +159,9 @@ test_param_in_files() {
 
   # Résultat final
   if [ $found -eq 1 ]; then
-    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR} $RES\n"
+    printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
   else
-    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR} $RES\n"
+    printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
     FAILED=$((FAILED + 1))
   fi
 }
@@ -231,13 +231,13 @@ fi
 # SSH Configuration
 echo
 printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
-systemctl is-active sshd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
-semanage port -l | grep -q "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
+systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
+semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR} $RES\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR} $RES\n" FAILED=$((FAILED + 1));
 
 # Monitoring script cron job
 echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
-crontab -l | grep -q "monitoring.sh" && printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+crontab -l | grep "monitoring.sh" && printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 printf "${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
@@ -247,7 +247,7 @@ printf "${BLUE}╚════════════════════�
 echo
 printf "${MAGENTA}1. Bonus Disk Partitions (Optional)${DEF_COLOR}\n";
 
-RES=$(lsblk | grep var | wc -l)
+RES=$(lsblk | grep -w "var" | wc -l)
 if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Var partition detected${DEF_COLOR} $RES \n"
 else
