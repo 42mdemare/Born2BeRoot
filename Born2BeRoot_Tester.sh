@@ -216,25 +216,12 @@ else
   FAILED=$((FAILED + 1))
 fi
 
-# Fonction pour tester un paramètre dans plusieurs fichiers
+# Fonction pour tester un paramètre dans les fichiers PAM
 test_param() {
   local param="$1"
   local expected_value="$2"
   local description="$3"
   local found=0
-
-  # Vérifier dans /etc/security/pwquality.conf
-  if [ -n "$expected_value" ]; then
-    RES=$(grep -Po "^\s*$param\s*=\s*$expected_value" /etc/security/pwquality.conf | tr -d '[:space:]')
-    if [ "$RES" == "$param=$expected_value" ]; then
-      found=1
-    fi
-  else
-    RES=$(grep -Po "^\s*$param" /etc/security/pwquality.conf | tr -d '[:space:]')
-    if [ "$RES" == "$param" ]; then
-      found=1
-    fi
-  fi
 
   # Vérifier dans /etc/pam.d/system-auth
   if [ -n "$expected_value" ]; then
@@ -280,7 +267,7 @@ test_param "maxrepeat" "3" "Maximum repeated characters (maxrepeat)"
 test_param "difok" "7" "Minimum different characters (difok)"
 test_param "enforce_for_root" "" "Enforce password rules for root"
 test_param "reject_username" "" "Reject username as password"
-test_param "usercheck" "1" "User check (alternative to reject_username)"
+
 
 
 # SSH Configuration
