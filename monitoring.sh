@@ -16,7 +16,7 @@ LVM_STATUS=$(lsblk | grep -q "lvm" && echo "yes" || echo "no")
 TCP_CONNECTIONS=$(ss -tn state established | grep -c ESTAB)
 USER_LOG=$(who | wc -l)
 IP=$(hostname -I | awk '{print $1}')
-MAC=$(ip link show | awk '/ether/ {print $2}')
+MAC=$(ip link show | awk '/ether/ {print $2; exit}')
 SUDO_CMDS=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
 
 MESSAGE="
