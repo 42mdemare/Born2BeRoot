@@ -37,9 +37,9 @@ printf "${BLUE}╚════════════════════�
 printf "${MAGENTA}1. GUI MODE DISABLE?${DEF_COLOR}\n";
 RES=$(systemctl get-default)
 if [[ $RES == "multi-user.target" ]]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} GUI mode disabled${DEF_COLOR}\n";
+  printf "${GREEN}[GOOD] ✔${GRAY} GUI mode disabled${DEF_COLOR} $RES\n";
 else
-  printf "${RED}[FAILED] ✗${GRAY} GUI mode enabled${DEF_COLOR}\n";
+  printf "${RED}[FAILED] ✗${GRAY} GUI mode enabled${DEF_COLOR} $RES\n";
   FAILED=$((FAILED + 1))
 fi
 
@@ -49,46 +49,46 @@ printf "${MAGENTA}2. Hostname${DEF_COLOR}\n";
 RES=$(hostname)
 EXPECTED_HOSTNAME="$(env | grep SUDO_USER | head -1 | cut -d '=' -f2)42"
 if [ "$RES" == "$EXPECTED_HOSTNAME" ]; then
-  printf "${GREEN}[GOOD] ✔${DEF_COLOR}\n";
+  printf "${GREEN}[GOOD] ✔${DEF_COLOR} $RES\n";
 else
-  printf "${RED}[FAILED] ✗${DEF_COLOR}\n";
+  printf "${RED}[FAILED] ✗${DEF_COLOR} $RES\n";
   FAILED=$((FAILED + 1))
 fi
 
 # LVM and encrypted partitions
 echo
-printf "${MAGENTA}3. Disk partitions${DEF_COLOR}\n";
+printf "${MAGENTA}3. Disk partitions${DEF_COLOR} $RES\n";
 
 # Vérification des partitions obligatoires
 RES=$(lsblk | grep lvm | wc -l)
 if [ $RES -gt 1 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} LVM partitions detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} LVM partitions detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No LVM partitions found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No LVM partitions found${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
 RES=$(lsblk | grep home | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Home partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Home partition detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No home partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No home partition found${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
 RES=$(lsblk | grep swap | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Swap partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Swap partition detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No swap partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No swap partition found${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
 RES=$(lsblk | grep root | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Root partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Root partition detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No root partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No root partition found${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
@@ -196,35 +196,35 @@ test_param_in_files "enforce_for_root" "" "Enforce password rules for root in PA
 # PASS_MAX_DAYS
 RES=$(grep "^PASS_MAX_DAYS" /etc/login.defs | awk '{print $2}')
 if [ "$RES" == "30" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MAX_DAYS = 30${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MAX_DAYS = 30${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} PASS_MAX_DAYS${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} PASS_MAX_DAYS${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
 # PASS_MIN_DAYS
 RES=$(grep "^PASS_MIN_DAYS" /etc/login.defs | awk '{print $2}')
 if [ "$RES" == "2" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MIN_DAYS = 2${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} PASS_MIN_DAYS = 2${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} PASS_MIN_DAYS${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} PASS_MIN_DAYS${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
 # PASS_WARN_AGE
 RES=$(grep "^PASS_WARN_AGE" /etc/login.defs | awk '{print $2}')
 if [ "$RES" == "7" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} PASS_WARN_AGE = 7${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} PASS_WARN_AGE = 7${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} PASS_WARN_AGE${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} PASS_WARN_AGE${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
 # Vérification du dossier /var/log/sudo
 if [ -d "/var/log/sudo/" ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR} $RES\n"
   FAILED=$((FAILED + 1))
 fi
 
@@ -249,30 +249,30 @@ printf "${MAGENTA}1. Bonus Disk Partitions (Optional)${DEF_COLOR}\n";
 
 RES=$(lsblk | grep var | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Var partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Var partition detected${DEF_COLOR} $RES \n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No var partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No var partition found${DEF_COLOR} $RES\n"
 fi
 
 RES=$(lsblk | grep srv | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Srv partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Srv partition detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No srv partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No srv partition found${DEF_COLOR} $RES\n"
 fi
 
 RES=$(lsblk | grep tmp | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Tmp partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Tmp partition detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No tmp partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No tmp partition found${DEF_COLOR} $RES\n"
 fi
 
 RES=$(lsblk | grep var--log | wc -l)
 if [ $RES -gt 0 ]; then
-  printf "${GREEN}[GOOD] ✔${GRAY} Var-log partition detected${DEF_COLOR}\n"
+  printf "${GREEN}[GOOD] ✔${GRAY} Var-log partition detected${DEF_COLOR} $RES\n"
 else
-  printf "${RED}[FAILED] ✗${GRAY} No var-log partition found${DEF_COLOR}\n"
+  printf "${RED}[FAILED] ✗${GRAY} No var-log partition found${DEF_COLOR} $RES\n"
 fi
 
 # Bonus: Web server and services
