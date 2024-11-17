@@ -258,6 +258,15 @@ else
   FAILED=$((FAILED + 1))
 fi
 
+# Vérification du message personnalisé pour sudo
+printf "${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
+grep -q '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Custom badpass_message configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Custom badpass_message not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+
+# Vérification du mode TTY
+grep -q '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+
+# Vérification des chemins sécurisés
+grep -q '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 printf "${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
 printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
@@ -266,7 +275,7 @@ printf "${BLUE}╚════════════════════�
 echo
 printf "${MAGENTA}1. Bonus Disk Partitions (Optional)${DEF_COLOR}\n";
 
-RES=$(lsblk | grep -w "var" | wc -l)
+RES=$(lsblk | awk '$NF == "/var"' | wc -l)
 if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Var partition detected${DEF_COLOR} $RES \n"
 else
@@ -297,17 +306,17 @@ fi
 # Bonus: Web server and services
 echo
 printf "${MAGENTA}2. Bonus: Web server and services${DEF_COLOR}\n";
-systemctl is-active lighttpd &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} Lighttpd active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Lighttpd inactive${DEF_COLOR}\n";
-systemctl is-active mariadb &>/dev/null && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} MariaDB inactive${DEF_COLOR}\n";
+systemctl is-active lighttpd && printf "${GREEN}[GOOD] ✔${GRAY} Lighttpd active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Lighttpd inactive${DEF_COLOR}\n";
+systemctl is-active mariadb && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} MariaDB inactive${DEF_COLOR}\n";
 
 # Last message according to the results
 echo
 if [ $FAILED -eq 0 ]; then
 printf "${GREEN}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
-printf "${GREEN}║   🎉🥳  Mandatory and Bonus Tests Completed, your have Rockyed it! 🥳🎉    ║\n${DEF_COLOR}"
+printf "${GREEN}║    🎉🥳  Mandatory and Bonus Tests Completed, your have Rockyed it! 🥳🎉     ║\n${DEF_COLOR}"
 printf "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
 else
 printf "${RED}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
-printf "${RED}║ 😢💔 Some tests failed. 😞It's sad😢Please review the issues above. 💔😢  ║\n${DEF_COLOR}"
+printf "${RED}║  😢💔 Some tests failed. 😞It's sad😢 Please review the issues above. 💔😢   ║\n${DEF_COLOR}"
 printf "${RED}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
 fi
