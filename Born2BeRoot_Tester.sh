@@ -242,7 +242,8 @@ echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 
 # Vérifier dans le crontab de l'utilisateur actuel
-if crontab -l | grep -P "^\s*[^#].*monitoring\.sh"; then
+FOUND=0
+if crontab -l 2>/dev/null | grep -P "^\s*[^#].*monitoring\.sh"; then
   FOUND=1
 fi
 
@@ -254,10 +255,25 @@ fi
 # Résultat final
 if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
+  # Exécuter monitoring.sh une fois
+  if [ -x "./monitoring.sh" ]; then
+    printf "${CYAN}Exécution du script monitoring.sh...${DEF_COLOR}\n"
+    ./monitoring.sh
+    if [ $? -eq 0 ]; then
+      printf "${GREEN}[GOOD] ✔${GRAY} monitoring.sh exécuté avec succès${DEF_COLOR}\n"
+    else
+      printf "${RED}[FAILED] ✗${GRAY} Échec lors de l'exécution de monitoring.sh${DEF_COLOR}\n"
+      FAILEDMAND=$((FAILEDMAND + 1))
+    fi
+  else
+    printf "${RED}[FAILED] ✗${GRAY} monitoring.sh n'est pas exécutable ou introuvable${DEF_COLOR}\n"
+    FAILEDMAND=$((FAILEDMAND + 1))
+  fi
 else
   printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
+
 
 # Vérification du message personnalisé pour sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
@@ -265,6 +281,43 @@ grep '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD]
 
 # Vérification du mode TTY
 grep '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
+
+# Vérification des groupes user42 et sudo
+echo
+printf "${MAGENTA}9. Vérification des groupes user42 et sudo${DEF_COLOR}\n"
+
+# Vérifier si les groupes user42 et sudo existent
+if grep -q "^sudo:" /etc/group; then
+  printf "${GREEN}[GOOD] ✔${GRAY} Le groupe sudo existe${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} Le groupe sudo n'existe pas${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
+if grep -q "^user42:" /etc/group; then
+  printf "${GREEN}[GOOD] ✔${GRAY} Le groupe user42 existe${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} Le groupe user42 n'existe pas${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
+# Vérifier si l'utilisateur actuel appartient aux groupes sudo et user42
+USER_GROUPS=$(groups $(whoami))
+
+if echo "$USER_GROUPS" | grep -qw "sudo"; then
+  printf "${GREEN}[GOOD] ✔${GRAY} L'utilisateur $(whoami) appartient au groupe sudo${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} L'utilisateur $(whoami) n'appartient pas au groupe sudo${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
+if echo "$USER_GROUPS" | grep -qw "user42"; then
+  printf "${GREEN}[GOOD] ✔${GRAY} L'utilisateur $(whoami) appartient au groupe user42${DEF_COLOR}\n"
+else
+  printf "${RED}[FAILED] ✗${GRAY} L'utilisateur $(whoami) n'appartient pas au groupe user42${DEF_COLOR}\n"
+  FAILED=$((FAILED + 1))
+fi
+
 
 # Vérification des chemins sécurisés
 grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
