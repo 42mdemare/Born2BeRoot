@@ -104,7 +104,8 @@ printf "${MAGENTA}6. Password policy${DEF_COLOR}\n";
 
 # minlen
 RES=$(grep -Po "minlen\s*=\s*10" /etc/security/pwquality.conf)
-if [[ "$RES" =~ minlen\s*=\s*10 ]]; then
+RES=$(echo "$RES" | tr -d '[:space:]')
+if [ "$RES" == "minlen=10" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} minlen${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} minlen${DEF_COLOR}\n"
@@ -113,7 +114,8 @@ fi
 
 # ucredit
 RES=$(grep -Po "ucredit\s*=\s*-1" /etc/security/pwquality.conf)
-if [[ "$RES" =~ ucredit\s*=\s*-1 ]]; then
+RES=$(echo "$RES" | tr -d '[:space:]')
+if [ "$RES" == "ucredit=-1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
@@ -122,7 +124,8 @@ fi
 
 # lcredit
 RES=$(grep -Po "lcredit\s*=\s*-1" /etc/security/pwquality.conf)
-if [[ "$RES" =~ lcredit\s*=\s*-1 ]]; then
+RES=$(echo "$RES" | tr -d '[:space:]')
+if [ "$RES" == "lcredit=-1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
@@ -131,7 +134,8 @@ fi
 
 # dcredit
 RES=$(grep -Po "dcredit\s*=\s*-1" /etc/security/pwquality.conf)
-if [[ "$RES" =~ dcredit\s*=\s*-1 ]]; then
+RES=$(echo "$RES" | tr -d '[:space:]')
+if [ "$RES" == "dcredit=-1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} digit (dcredit)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} digit (dcredit)${DEF_COLOR}\n"
@@ -140,7 +144,8 @@ fi
 
 # maxrepeat
 RES=$(grep -Po "maxrepeat\s*=\s*3" /etc/security/pwquality.conf)
-if [[ "$RES" =~ maxrepeat\s*=\s*3 ]]; then
+RES=$(echo "$RES" | tr -d '[:space:]')
+if [ "$RES" == "maxrepeat=3" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
@@ -149,7 +154,8 @@ fi
 
 # difok
 RES=$(grep -Po "difok\s*=\s*7" /etc/security/pwquality.conf)
-if [[ "$RES" =~ difok\s*=\s*7 ]]; then
+RES=$(echo "$RES" | tr -d '[:space:]')
+if [ "$RES" == "difok=7" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} different characters (difok)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} different characters (difok)${DEF_COLOR}\n"
