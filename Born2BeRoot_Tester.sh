@@ -234,7 +234,7 @@ printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
 systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
-# Monitoring script cron job
+# Check for the monitoring.sh script in the cron configuration
 echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 
@@ -274,7 +274,6 @@ else
   printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
   FAILEDMAND=$((FAILEDMAND + 1))
 fi
-
 
 # Checking custom message for sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
