@@ -259,15 +259,15 @@ else
 fi
 
 # Vérification du message personnalisé pour sudo
-printf "${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
-grep -q '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Custom badpass_message configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Custom badpass_message not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
+grep '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Custom badpass_message configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Custom badpass_message not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 # Vérification du mode TTY
-grep -q '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+grep '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILED=$((FAILED + 1));
 
 # Vérification des chemins sécurisés
-grep -q '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
-printf "${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
+grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+printf "\n${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
 printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
 
