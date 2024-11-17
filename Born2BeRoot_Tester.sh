@@ -241,7 +241,7 @@ echo
 printf "${MAGENTA}7. Cronjob for monitoring script${DEF_COLOR}\n";
 
 # Vérifier dans le crontab de l'utilisateur actuel
-if crontab -l 2>/dev/null | grep -P "^\s*[^#].*monitoring\.sh"; then
+if crontab -l | grep -P "^\s*[^#].*monitoring\.sh"; then
   FOUND=1
 fi
 
