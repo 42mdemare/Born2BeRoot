@@ -103,8 +103,8 @@ echo
 printf "${MAGENTA}6. Password policy${DEF_COLOR}\n";
 
 # minlen
-RES=$(grep -o "minlen=10" /etc/security/pwquality.conf)
-if [ "$RES" == "minlen=10" ]; then
+RES=$(grep -Po "minlen\s*=\s*10" /etc/security/pwquality.conf)
+if [[ "$RES" =~ minlen\s*=\s*10 ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} minlen${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} minlen${DEF_COLOR}\n"
@@ -112,8 +112,8 @@ else
 fi
 
 # ucredit
-RES=$(grep -o "ucredit=-1" /etc/security/pwquality.conf)
-if [ "$RES" == "ucredit=-1" ]; then
+RES=$(grep -Po "ucredit\s*=\s*-1" /etc/security/pwquality.conf)
+if [[ "$RES" =~ ucredit\s*=\s*-1 ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} uppercase (ucredit)${DEF_COLOR}\n"
@@ -121,8 +121,8 @@ else
 fi
 
 # lcredit
-RES=$(grep -o "lcredit=-1" /etc/security/pwquality.conf)
-if [ "$RES" == "lcredit=-1" ]; then
+RES=$(grep -Po "lcredit\s*=\s*-1" /etc/security/pwquality.conf)
+if [[ "$RES" =~ lcredit\s*=\s*-1 ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} lowercase (lcredit)${DEF_COLOR}\n"
@@ -130,8 +130,8 @@ else
 fi
 
 # dcredit
-RES=$(grep -o "dcredit=-1" /etc/security/pwquality.conf)
-if [ "$RES" == "dcredit=-1" ]; then
+RES=$(grep -Po "dcredit\s*=\s*-1" /etc/security/pwquality.conf)
+if [[ "$RES" =~ dcredit\s*=\s*-1 ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} digit (dcredit)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} digit (dcredit)${DEF_COLOR}\n"
@@ -139,8 +139,8 @@ else
 fi
 
 # maxrepeat
-RES=$(grep -o "maxrepeat=3" /etc/security/pwquality.conf)
-if [ "$RES" == "maxrepeat=3" ]; then
+RES=$(grep -Po "maxrepeat\s*=\s*3" /etc/security/pwquality.conf)
+if [[ "$RES" =~ maxrepeat\s*=\s*3 ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} consecutive characters (maxrepeat)${DEF_COLOR}\n"
@@ -148,13 +148,14 @@ else
 fi
 
 # difok
-RES=$(grep -o "difok=7" /etc/security/pwquality.conf)
-if [ "$RES" == "difok=7" ]; then
+RES=$(grep -Po "difok\s*=\s*7" /etc/security/pwquality.conf)
+if [[ "$RES" =~ difok\s*=\s*7 ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} different characters (difok)${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} different characters (difok)${DEF_COLOR}\n"
   FAILED=$((FAILED + 1))
 fi
+
 
 # enforce_for_root
 RES=$(grep -o "enforce_for_root" /etc/security/pwquality.conf)
