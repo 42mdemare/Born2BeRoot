@@ -254,23 +254,6 @@ fi
 # Check if the script is found
 if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
-
-  # Find and execute the monitoring.sh script silently
-  MONITORING_PATH=$(find / -type f -name "monitoring.sh" -executable 2>/dev/null | head -n 1)
-
-  if [ -n "$MONITORING_PATH" ]; then
-    bash "$MONITORING_PATH" >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-      # Log success (no display)
-      :
-    else
-      printf "${RED}[FAILED] ✗${GRAY} Failed to run monitoring.sh using bash${DEF_COLOR}\n"
-      FAILEDMAND=$((FAILEDMAND + 1))
-    fi
-  else
-    printf "${RED}[FAILED] ✗${GRAY} monitoring.sh is not executable or not found${DEF_COLOR}\n"
-    FAILEDMAND=$((FAILEDMAND + 1))
-  fi
 else
   printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
   FAILEDMAND=$((FAILEDMAND + 1))
