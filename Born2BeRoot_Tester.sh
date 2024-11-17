@@ -11,7 +11,8 @@ CYAN='\033[0;96m'
 GRAY='\033[0;90m'
 WHITE='\033[0;97m'
 
-FAILED=0
+FAILEDMAND=0
+FAILEDBONUS=0
 #Vérification de la présence de monitoring.sh
 FOUND=0
 
@@ -42,7 +43,7 @@ if [[ $RES == "multi-user.target" ]]; then
   printf "${GREEN}[GOOD] ✔${GRAY} GUI mode disabled${DEF_COLOR}\n";
 else
   printf "${RED}[FAILED] ✗${GRAY} GUI mode enabled${DEF_COLOR}\n";
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # Hostname check
@@ -54,7 +55,7 @@ if [ "$RES" == "$EXPECTED_HOSTNAME" ]; then
   printf "${GREEN}[GOOD] ✔${DEF_COLOR} $RES\n";
 else
   printf "${RED}[FAILED] ✗${DEF_COLOR} $RES\n";
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # LVM and encrypted partitions
@@ -67,7 +68,7 @@ if [ $RES -gt 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} LVM partitions detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No LVM partitions found${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 RES=$(lsblk | grep home | wc -l)
@@ -75,7 +76,7 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Home partition detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No home partition found${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 RES=$(lsblk | grep swap | wc -l)
@@ -83,7 +84,7 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Swap partition detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No swap partition found${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 RES=$(lsblk | grep root | wc -l)
@@ -91,14 +92,14 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Root partition detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No root partition found${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # Firewalld configuration
 echo
 printf "${MAGENTA}4. Firewalld (Firewall)${DEF_COLOR}\n";
-systemctl is-active firewalld  && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR}\n"FAILED=$((FAILED + 1));
-firewall-cmd --list-ports | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR}\n"FAILED=$((FAILED + 1));
+systemctl is-active firewalld  && printf "${GREEN}[GOOD] ✔${GRAY} Firewalld active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Firewalld inactive${DEF_COLOR}\n"FAILEDMAND=$((FAILEDMAND + 1));
+firewall-cmd --list-ports | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 open${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 closed${DEF_COLOR}\n"FAILEDMAND=$((FAILEDMAND + 1));
 
 # PAM configuration for password policy
 echo
@@ -127,7 +128,7 @@ test_param_in_file() {
     printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR} $RES\n"
   else
     printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR} $RES\n"
-    FAILED=$((FAILED + 1))
+    FAILEDMAND=$((FAILEDMAND + 1))
   fi
 }
 
@@ -164,7 +165,7 @@ test_param_in_files() {
     printf "${GREEN}[GOOD] ✔${GRAY} $description${DEF_COLOR}\n"
   else
     printf "${RED}[FAILED] ✗${GRAY} $description${DEF_COLOR}\n"
-    FAILED=$((FAILED + 1))
+    FAILEDMAND=$((FAILEDMAND + 1))
   fi
 }
 
@@ -183,7 +184,7 @@ if [ "$RES" == "reject_username" ] || [ "$RES" == "usercheck=1" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Username restriction active (reject_username or usercheck=1)${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} Username restriction inactive${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # Tester les paramètres requis dans PAM (system-auth et password-auth)
@@ -201,7 +202,7 @@ if [ "$RES" == "30" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} PASS_MAX_DAYS = 30${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} PASS_MAX_DAYS${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # PASS_MIN_DAYS
@@ -210,7 +211,7 @@ if [ "$RES" == "2" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} PASS_MIN_DAYS = 2${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} PASS_MIN_DAYS${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # PASS_WARN_AGE
@@ -219,7 +220,7 @@ if [ "$RES" == "7" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} PASS_WARN_AGE = 7${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} PASS_WARN_AGE${DEF_COLOR} $RES\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # Vérification du dossier /var/log/sudo
@@ -227,14 +228,14 @@ if [ -d "/var/log/sudo/" ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} folder /var/log/sudo exists${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} folder /var/log/sudo does not exist${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # SSH Configuration
 echo
 printf "${MAGENTA}6. SSH Configuration${DEF_COLOR}\n";
-systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILED=$((FAILED + 1));
-semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+systemctl is-active sshd && printf "${GREEN}[GOOD] ✔${GRAY} SSH active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} SSH inactive${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
+semanage port -l | grep "4242" && printf "${GREEN}[GOOD] ✔${GRAY} Port 4242 allowed in SELinux${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Port 4242 not allowed in SELinux${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
 # Monitoring script cron job
 echo
@@ -255,18 +256,18 @@ if [ $FOUND -eq 1 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Monitoring script scheduled${DEF_COLOR}\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} Monitoring script missing in cron${DEF_COLOR}\n"
-  FAILED=$((FAILED + 1))
+  FAILEDMAND=$((FAILEDMAND + 1))
 fi
 
 # Vérification du message personnalisé pour sudo
 printf "\n${MAGENTA}8. Sudo Configuration${DEF_COLOR}\n";
-grep '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Custom badpass_message configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Custom badpass_message not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+grep '^Defaults\s\+badpass_message=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Custom badpass_message configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Custom badpass_message not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
 # Vérification du mode TTY
-grep '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+grep '^Defaults\s\+requiretty' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} TTY mode enabled${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} TTY mode not enabled${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 
 # Vérification des chemins sécurisés
-grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILED=$((FAILED + 1));
+grep '^Defaults\s\+secure_path=".*"$' /etc/sudoers && printf "${GREEN}[GOOD] ✔${GRAY} Secure path configured${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Secure path not configured${DEF_COLOR}\n" FAILEDMAND=$((FAILEDMAND + 1));
 printf "\n${BLUE}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${BLUE}║                                   Bonus Tests                                ║\n${DEF_COLOR}"
 printf "${BLUE}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
@@ -280,6 +281,7 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Var partition detected${DEF_COLOR} $RES \n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No var partition found${DEF_COLOR} $RES\n"
+  FAILEDBONUS=$((FAILEDBONUS + 1))
 fi
 
 RES=$(lsblk | grep srv | wc -l)
@@ -287,6 +289,7 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Srv partition detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No srv partition found${DEF_COLOR} $RES\n"
+  FAILEDBONUS=$((FAILEDBONUS + 1))
 fi
 
 RES=$(lsblk | grep tmp | wc -l)
@@ -294,6 +297,7 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Tmp partition detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No tmp partition found${DEF_COLOR} $RES\n"
+  FAILEDBONUS=$((FAILEDBONUS + 1))
 fi
 
 RES=$(lsblk | grep var--log | wc -l)
@@ -301,19 +305,24 @@ if [ $RES -gt 0 ]; then
   printf "${GREEN}[GOOD] ✔${GRAY} Var-log partition detected${DEF_COLOR} $RES\n"
 else
   printf "${RED}[FAILED] ✗${GRAY} No var-log partition found${DEF_COLOR} $RES\n"
+  FAILEDBONUS=$((FAILEDBONUS + 1))
 fi
 
 # Bonus: Web server and services
 echo
 printf "${MAGENTA}2. Bonus: Web server and services${DEF_COLOR}\n";
-systemctl is-active lighttpd && printf "${GREEN}[GOOD] ✔${GRAY} Lighttpd active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Lighttpd inactive${DEF_COLOR}\n";
-systemctl is-active mariadb && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} MariaDB inactive${DEF_COLOR}\n";
-
+systemctl is-active lighttpd && printf "${GREEN}[GOOD] ✔${GRAY} Lighttpd active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} Lighttpd inactive${DEF_COLOR} FAILEDBONUS=$((FAILEDBONUS + 1))\n";
+systemctl is-active mariadb && printf "${GREEN}[GOOD] ✔${GRAY} MariaDB active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} MariaDB inactive${DEF_COLOR} FAILEDBONUS=$((FAILEDBONUS + 1))\n";
+systemctl is-active php-fpm && printf "${GREEN}[GOOD] ✔${GRAY} PHP active${DEF_COLOR}\n" || printf "${RED}[FAILED] ✗${GRAY} PHP inactive${DEF_COLOR} FAILEDBONUS=$((FAILEDBONUS + 1))\n";
 # Last message according to the results
 echo
-if [ $FAILED -eq 0 ]; then
+if [ $FAILEDMAND -eq 0 && FAILEDBONUS]; then
 printf "${GREEN}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
 printf "${GREEN}║    🎉🥳  Mandatory and Bonus Tests Completed, your have Rockyed it! 🥳🎉     ║\n${DEF_COLOR}"
+printf "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
+else if [ $FAILEDMAND -eq 0 ]; then
+printf "${GREEN}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
+printf "${GREEN}║         🎉🥳  Mandatory Tests Completed, your have Rockyed it! 🥳🎉          ║\n${DEF_COLOR}"
 printf "${GREEN}╚══════════════════════════════════════════════════════════════════════════════╝\n${DEF_COLOR}"
 else
 printf "${RED}╔══════════════════════════════════════════════════════════════════════════════╗\n${DEF_COLOR}"
