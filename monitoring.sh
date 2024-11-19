@@ -13,7 +13,7 @@ DISK_USAGE=$(df -BG --output=size,used,pcent / | awk 'NR==2 {printf "%s/%s (%s)\
 CPU_LOAD=$(top -b -n1 | awk '/Cpu\(s\):/ {printf "%.1f%%", $2 + $4}')
 LAST_BOOT=$(who -b | awk '{print $3, $4}')
 LVM_STATUS=$(lsblk | grep -q "lvm" && echo "yes" || echo "no")
-TCP_CONNECTIONS=$(ss -tn state established | grep -c ESTAB)
+TCP_CONNECTIONS=$(ss -tan | grep ESTAB | wc -l)
 USER_LOG=$(who | wc -l)
 IP=$(hostname -I | awk '{print $1}')
 MAC=$(ip link show | awk '/ether/ {print $2; exit}')
