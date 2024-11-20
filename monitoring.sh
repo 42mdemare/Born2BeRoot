@@ -16,11 +16,10 @@ LVM_STATUS=$(lsblk | grep -q "lvm" && echo "yes" || echo "no")
 TCP_CONNECTIONS=$(ss -tan | grep ESTAB | wc -l)
 USER_LOG=$(who | wc -l)
 IP=$(hostname -I | awk '{print $1}')
-MAC=$(ip link show | awk '/ether/ {print $2; exit}')
+MAC=$(ip link show | awk '/ether/ {print $2}')
 SUDO_CMDS=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
 
 MESSAGE="
-
 ####################################################################
 ##                                                                ##
 ##                      SYSTEM MONITORING REPORT                  ##
@@ -28,37 +27,38 @@ MESSAGE="
 ####################################################################
 ##                                                                ##
 ##   [SYSTEM]                                                     ##
-##   Distribution               : $DISTRIBUTION                           ##
-##   Kernel Version             : $KERNEL         ##
-##   System Version             : $VERSION                                ##
-##   Hardware Architecture      : $ARCH                   ##
+##   Distribution		: $DISTRIBUTION				  ## 
+##   Kernel Version		: $KERNEL	  ## 
+##   System Version		: $VERSION				  ##
+##   Hardware Architecture	: $ARCH			  ##
+##								  ##
+##   [PROCESSOR]						  ##
+##   Physical CPUs		: $CPU_PHYSICAL                               ##
+##   Virtual CPUs (Threads)	: $VCPU                               ##
+##   CPU Load			: $CPU_LOAD                   	  ##
+##								  ##
+##   [MEMORY AND STORAGE]					  ##
+##   RAM Usage			: $RAM_USAGE		  ##
+##   Disk Usage			: $DISK_USAGE			  ##
+##								  ##
+##   [BOOT AND STATUS]						  ##
+##   Last Boot			: $LAST_BOOT	 	  ##
+##   LVM Active			: $LVM_STATUS				  ##
+##								  ##
+##   [NETWORK]							  ##
+##   IPv4 Address		: $IP			  ##
+##   MAC Address		: $MAC		  ##
 ##                                                                ##
-##   [PROCESSOR]                                                  ##
-##   Physical CPUs              : $CPU_PHYSICAL                               ##
-##   Virtual CPUs (Threads)     : $VCPU                               ##
-##   CPU Load                   : $CPU_LOAD                       ##
+##   [SECURITY]							  ##
+##   Sudo Commands Executed	: $SUDO_CMDS 				  ##
 ##                                                                ##
-##   [MEMORY AND STORAGE]                                         ##
-##   RAM Usage                  : $RAM_USAGE              ##
-##   Disk Usage                 : $DISK_USAGE                     ##
-##                                                                ##
-##   [BOOT AND STATUS]                                            ##
-##   Last Boot                  : $LAST_BOOT              ##
-##   LVM Active                 : $LVM_STATUS                             ##
-##                                                                ##
-##   [NETWORK]                                                    ##
-##   IPv4 Address               : $IP                     ##
-##   MAC Address                : $MAC            ##
-##                                                                ##
-##   [SECURITY]                                                   ##
-##   Sudo Commands Executed     : $SUDO_CMDS                              ##
-##                                                                ##
-##   [CONNECTIONS]                                                ##
-##   Active TCP Connections     : $TCP_CONNECTIONS                               ##
-##   Logged In Users            : $USER_LOG                               ##
-##                                                                ##
+##   [CONNECTIONS]						  ##
+##   Active TCP Connections	: $TCP_CONNECTIONS                               ##
+##   Logged In Users		: $USER_LOG                               ##
+##								  ##
 ####################################################################
 "
 
+# Broadcast the message to all connected terminals
 echo "$MESSAGE" | wall 2>/dev/null
 echo ""
